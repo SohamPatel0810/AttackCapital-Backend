@@ -1,0 +1,19 @@
+{
+  "VALIDATION": {
+    "EXISTS": {
+      "EMAIL": "A user having this email address already exists"
+    },
+    "INCORRECT": {
+      "PASSWORD": "Invalid Password.",
+      "EMAIL": "Your email-id is incorrect."
+    },
+    "USER": {
+      "DOESNTEXIST": "Cannot create post."
+    }
+  },
+  "CREATED": {
+    "USER": "Successfully created new user.",
+    "LOGIN": "Login Successfull.",
+    "POST": "Post created Successfully."
+  }
+}
