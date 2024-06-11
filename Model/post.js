@@ -1,79 +1,55 @@
 const { post: PostSchema } = require("../Database/Schemas");
 class PostModel {
-  async addPost(post, userDetails) {
+  async addPost(post, userId) {
     let newPost = await PostSchema({
-      authorId: userDetails?._id,
+      authorId: userId,
       title: post?.title,
       content: post?.content,
     });
     return await newPost.save();
   }
 
-  async getPosts(body) {
-    const limit = parseInt(body.per_page);
-    const offset = body.per_page * (body.current_page - 1);
-
-    const posts = await PostSchema.aggregate([
-      {
-        _id: 1,
-        title: 1,
-        content: 1,
-        authorId: 1,
-      },
-      {
-        $lookup: {
-          from: "user",
-          localField: "authorId",
-          foreignField: "_id",
-          as: "user",
+  async getPosts(author,user_token) {
+    let posts;
+    if (author && user_token) {
+      posts = await PostSchema.aggregate([
+        {
+          $match: {
+            authorId: new mongoose.Types.ObjectId(author),
+          },
         },
-      },
-      {
-        skip: offset,
-        limit: limit,
-      },
-    ]);
-    let count = await PostSchema.countDocuments({});
-    return {
-      rows: posts,
-      count,
-    };
-  }
-
-  async getPost(userId, body) {
-    const limit = parseInt(body.per_page);
-    const offset = body.per_page * (body.current_page - 1);
-
-    const posts = await PostSchema.aggregate([
-      {
-        $match: {
-          authorId: userId,
+        {
+          $project: {
+            authorId: 1,
+            title: 1,
+            content: 1,
+            created_at: 1,
+          },
         },
-      },
-      {
-        _id: 1,
-        title: 1,
-        content: 1,
-        authorId: 1,
-      },
-      {
-        $lookup: {
-          from: "user",
-          localField: "authorId",
-          foreignField: "_id",
-          as: "user",
+        {
+          $sort: {
+            created_at: -1,
+          },
         },
-      },
-      {
-        skip: offset,
-        limit: limit,
-      },
-    ]);
-    let count = await PostSchema.countDocuments({});
-    return {
-      rows: posts,
-      count,
-    };
+      ]);
+    } else {
+      posts = await PostSchema.aggregate([
+        {
+          $project: {
+            authorId: 1,
+            title: 1,
+            content: 1,
+            created_at: 1,
+          },
+        },
+        {
+          $sort: {
+            created_at: -1,
+          },
+        },
+      ]);
+    }
+    return posts;
   }
 }
 

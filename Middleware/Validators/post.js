@@ -8,6 +8,4 @@ exports.create = [
 
 exports.getPost = [
   header("auth_token", "Please send auth_token").trim().notEmpty(),
-  body("per_page", "Please enter valid per_page").trim().notEmpty(),
-  body("current_page", "Please enter valid current_page").trim().notEmpty(),
 ];

@@ -1,7 +1,6 @@
 const randomstring = require("randomstring");
 const bcrypt = require("bcryptjs");
 const saltRounds = parseInt(process.env.ENCRYPTION_SALT_ROUNDS);
-const jwt = require("jsonwebtoken");
 
 class EncryptionHandler {
   bcrypt(data) {
@@ -17,10 +16,8 @@ class EncryptionHandler {
   }
 
   generateAuthToken() {
-    var token = jwt.sign(data, process.env.JWT_KEY, {
-      expiresIn: "5h",
-    });
-    return token;
+    var tokenString = randomstring.generate(35);
+    return bcrypt.hashSync(tokenString, bcrypt.genSaltSync(saltRounds), null);
   }
 }
 

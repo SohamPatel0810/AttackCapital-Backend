@@ -9,25 +9,22 @@ class AuthenticationModel {
 
   async addNewUser(user) {
     if (user.password) {
-      user.password = Encrypt.bcrypt(user.password);
+      user.passwordHash = Encrypt.bcrypt(user.password);
     }
+    user.token = null;
     let newUser = await UserSchema(user);
     return await newUser.save();
   }
 
-  async updateUserToken(user) {
-    const data = {
-      email: user?.email,
-      userId: user?._id,
-    };
-    const authToken = await Encrypt.generateAuthToken(data);
-    return await UserSchema.update(
+  async updateUserToken(user,authToken) {
+    return await UserSchema.updateOne(
       {
-        user_id: user?._id,
+        _id: user?._id,
       },
+
       {
         $set: {
-          passwordHash: authToken,
+          token: authToken,
         },
       }
     );

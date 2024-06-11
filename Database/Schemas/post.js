@@ -6,6 +6,8 @@ const PostSchema = new Schema(
   {
     authorId: {
       type: Schema.Types.ObjectId,
+      ref: "user",
+      required: true,
     },
     title: {
       type: String,
@@ -24,4 +26,4 @@ const PostSchema = new Schema(
   }
 );
 
-module.exports = mongoose.model("user_token", PostSchema);
+module.exports = mongoose.model("post", PostSchema);

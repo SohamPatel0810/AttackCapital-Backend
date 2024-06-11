@@ -1,5 +1,6 @@
 const AuthenticationModel = new (require("../Model/authentication"))();
 const { STATUS_CODES } = require("../Configs/constants");
+const Encrypt = new (require("../Configs/encryption"))();
 
 class AuthenticationController {
   async signUp(req, res) {
@@ -25,7 +26,7 @@ class AuthenticationController {
 
   async logIn(req, res) {
     try {
-      let userDetails = await AuthenticationModel.findUserByEmail(req.body);
+      let userDetails = await AuthenticationModel.findUserByEmail(req.body?.email);
 
       if (!userDetails)
         return res.handler.custom(
@@ -33,23 +34,19 @@ class AuthenticationController {
           "VALIDATION.INCORRECT.EMAIL"
         );
 
-      let isValidPass = await Encypt.compareBcrypt(
+      let isValidPass = await Encrypt.compareBcrypt(
         req.body.password,
-        userDetails.password
+        userDetails.passwordHash
       );
       if (!isValidPass)
         return res.handler.custom(
           STATUS_CODES.CONFLICT,
           "VALIDATION.INCORRECT.PASSWORD"
         );
+      const authToken = await Encrypt.generateAuthToken();
+      await AuthenticationModel.updateUserToken(userDetails,authToken);
 
-      await AuthenticationModel.updateUserToken(userDetails);
-
-      delete userDetails.passwordHash;
-      return res.handler.custom(STATUS_CODES.SUCCESS, "CREATED.LOGIN", {
-        token,
-        user: userDetails,
-      });
+      return res.handler.custom(STATUS_CODES.SUCCESS, "CREATED.LOGIN", {token:authToken,user : userDetails});
     } catch (error) {
       res.handler.serverError(error);
     }
